@@ -3,8 +3,8 @@
   "description": "This is a simple WebExtension that adds support to use Speech To Text as an input method in web pages.",
   "version": "1.0.0",
   "author": {
-    "name": "Fabrice Desré",
-    "url": "https://github.com/fabricedesre"
+    "name": "Andre Natal & Fabrice Desré",
+    "url": "https://github.com/mozilla/speaktome"
   },
   "bugs": {
     "url": "https://github.com/mozilla/speaktome/issues"
@@ -24,7 +24,7 @@
     "url": "git+https://github.com/mozilla/speaktome.git"
   },
   "scripts": {
-    "build": "web-ext build -s extension",
+    "build": "web-ext build -s extension --overwrite-dest",
     "format": "prettier 'extension/!(webrtc_vad).{js,css}' --tab-width=4 --write",
     "lint": "npm-run-all lint:*",
     "lint:extension": "web-ext lint -s extension --ignore-files webrtc_vad.js --self-hosted",

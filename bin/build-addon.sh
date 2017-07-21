@@ -13,3 +13,4 @@ else
     --api-secret $TESTPILOT_AMO_SECRET
   mv ./web-ext-artifacts/*.xpi ./signed-addon.xpi
 fi
+

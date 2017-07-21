@@ -25,14 +25,14 @@ Data will be collected with Google Analytics and follow [Test Pilot standards](h
 
 ### Custom Metrics
 - `cm1` - the number of attempts made in a session.
-- `cm2` - the confidence level of the accepted suggestion, if one was accepted; otherwise omitted.
+- `cm2` - the confidence level of the accepted suggestion, if one was accepted; otherwise omitted. Integer between `1` and `100`, inclusive.
 - `cm3` - the index of an accepted suggestion, if one was accepted; otherwise omitted.
 - `cm4` - the elapsed time in ms spent recording an attempt.
 - `cm5` - the elapsed time in ms waiting for a response from the speech-to-text engine.
 
 ### Custom Dimensions
 - `cd1` - the outcome of a session or attempt. One of `accepted`, `rejected`, and `aborted`.
-- `cd2` - the location from which a session is initiated. One of `about:home`, `about:newtab`, `google`, `duckduckgo`, `bing`, `generic`.
+- `cd2` - the location from which a session is initiated. One of `google`, `duckduckgo`, `Yahoo`, `generic`.
 - `cd3` - the UI element from which the session was initiated. One of `button`, `context menu`, `keyboard`.
 - `cd4` - whether the accepted submission was modified before being submitted. One of `true`, `false`.
 - `cd5` - whether the user viewed additional suggestions.

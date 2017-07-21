@@ -13,221 +13,250 @@
     }
 
     const LOCAL_TEST = false;
+    const STT_SERVER_URL = "https://speaktome.stage.mozaws.net";
 
-    const stt_server_url = "https://speaktome.stage.mozaws.net";
+    const DONE_ANIMATION = browser.extension.getURL("Done.json");
+    const SPINNING_ANIMATION = browser.extension.getURL("Spinning.json");
+    const START_ANIMATION = browser.extension.getURL("Start.json");
 
-    function visualize(analyzerNode) {
-        const MIN_DB_LEVEL = -85; // The dB level that is 0 in the levels display
-        const MAX_DB_LEVEL = -30; // The dB level that is 100% in the levels display
 
-        // Set up the analyzer node, and allocate an array for its data
-        // FFT size 64 gives us 32 bins. But those bins hold frequencies up to
-        // 22kHz or more, and we only care about visualizing lower frequencies
-        // which is where most human voice lies, so we use fewer bins
-        analyzerNode.fftSize = 64;
-        const frequencyBins = new Float32Array(14);
-
-        // Clear the canvas
-        const levels = document.getElementById("stm-levels");
-        const context = levels.getContext("2d");
-        context.clearRect(0, 0, levels.width, levels.height);
-
-        if (levels.hidden) {
-            // If we've been hidden, return right away without calling rAF again.
-            return;
+    const getSTMAnchors = documentDomain => {
+        switch (documentDomain) {
+            case "www.google.com":
+            case "www.google.ca":
+            case "www.google.co.uk":
+                return {
+                    input: "lst-ib",
+                    anchor: "sfdiv"
+                }
+            case "duckduckgo.com":
+                if (document.body.classList.contains("body--serp")) {
+                    return {
+                        input: "search_form_input",
+                        anchor: "search_form"
+                    };
+                }
+                return {
+                    input: "search_form_input_homepage",
+                    anchor: "search_form_homepage"
+                };
+            case "ca.yahoo.com":
+            case "uk.yahoo.com":
+            case "www.yahoo.com":
+                return {
+                    input: "uh-search-box",
+                    anchor: "uh-search-form"
+                };
+            default:
+                return null;
         }
-
-        // Get the FFT data
-        analyzerNode.getFloatFrequencyData(frequencyBins);
-
-        // Display it as a barchart.
-        // Drop bottom few bins, since they are often misleadingly high
-        const skip = 2;
-        const n = frequencyBins.length - skip;
-        const barwidth = levels.width / n;
-        const dbRange = MAX_DB_LEVEL - MIN_DB_LEVEL;
-
-        // Loop through the values and draw the bars
-        context.fillStyle = "black";
-        for (let i = 0; i < n; i++) {
-            const value = frequencyBins[i + skip];
-            const height = levels.height * (value - MIN_DB_LEVEL) / dbRange;
-            if (height < 0) {
-                continue;
-            }
-            // Display a bar for this value.
-            context.fillRect(
-                i * barwidth,
-                (levels.height - height) / 2,
-                barwidth / 2,
-                height
-            );
-        }
-
-        // Update the visualization the next time we can
-        requestAnimationFrame(function() {
-            visualize(analyzerNode);
-        });
     }
 
+
     // Encapsulation of the popup we use to provide our UI.
-    const popup_markup = `
-<div id="stm-popup">
-  <span id="stm-stop">Speak To Me…</span>
-  <div id="stm-divlevels"> <canvas hidden id="stm-levels" width=150 height=50></canvas></div>
-  <div id="stm-list"></div>
-</div>
-`;
+    const POPUP_WRAPPER_MARKUP = `<div id="stm-popup">
+            <div id="stm-header"><div role="button" tabindex="1" id="stm-close"></div></div>
+            <div id="stm-inject"></div>
+            <a href="https://qsurvey.mozilla.com/s3/voice-fill" id="stm-feedback" role="button" tabindex="2">Feedback</a>
+        </div>`;
+
+    // When submitting, this markup is passed in
+    const SUBMISSION_MARKUP = `<div id="stm-levels-wrapper">
+            <canvas hidden id="stm-levels" width=720 height=310></canvas>
+        </div>
+        <div id="stm-animation-wrapper">
+            <div id="stm-box"></div>
+        </div>
+        <div id="stm-content">
+            <div id="stm-startup-text">Warming up...</div>
+        </div>`;
+
+    // When Selecting, this markup is passed in
+    const SELECTION_MARKUP = `<form id="stm-selection-wrapper">
+            <div id="stm-list-wrapper">
+                <input id="stm-input" type="text" />
+                <div id="stm-list"></div>
+            </div>
+            <button id="stm-reset-button" title="reset" type="button"></button>
+            <input id="stm-submit-button" type="submit" title="sumbit" value=""/>
+        </form>`;
 
     const SpeakToMePopup = {
+        // closeClicked used to skip out of media recording handling
+        closeClicked: false,
         init: () => {
             console.log(`SpeakToMePopup init`);
             const popup = document.createElement("div");
-            popup.innerHTML = popup_markup;
+            popup.innerHTML = POPUP_WRAPPER_MARKUP;
             document.body.appendChild(popup);
+            this.inject = document.getElementById("stm-inject");
             this.popup = document.getElementById("stm-popup");
-            this.list = document.getElementById("stm-list");
+            this.icon = document.getElementsByClassName("stm-icon")[0];
+            this.inject.innerHTML = SUBMISSION_MARKUP;
         },
 
         showAt: (x, y) => {
             console.log(`SpeakToMePopup showAt ${x},${y}`);
-            this.list.classList.add("hidden");
             const style = this.popup.style;
-            style.display = "block";
-            const bcr = this.popup.getBoundingClientRect();
-            style.left = x + window.scrollX - bcr.width / 2 + "px";
-            style.top = y + window.scrollY - bcr.width / 2 + "px";
+            style.display = "flex";
         },
 
         hide: () => {
             console.log(`SpeakToMePopup hide`);
-            this.popup.style.display = "none";
+            this.popup.classList.add("stm-drop-out");
+            this.icon.classList.remove("stm-hidden");
+
+            setTimeout(() => {
+                this.popup.classList.remove("stm-drop-out");
+                this.popup.style.display = "none";
+                this.inject.innerHTML = SUBMISSION_MARKUP;
+            }, 500);
+        },
+
+        reset: () => {
+            this.inject.innerHTML = SUBMISSION_MARKUP;
         },
 
         // Returns a Promise that resolves once the "Stop" button is clicked.
         // TODO: replace with silence detection.
+        // TODO: make stop button clickable
         wait_for_stop: () => {
             console.log(`SpeakToMePopup wait_for_stop`);
             return new Promise((resolve, reject) => {
                 console.log(`SpeakToMePopup set popup stop listener`);
-                const button = document.getElementById("stm-stop");
                 const popup = document.getElementById("stm-popup");
-                button.classList.remove("hidden");
+                const close = document.getElementById("stm-close");
                 popup.addEventListener("click", function _mic_stop() {
-                    button.classList.add("hidden");
                     popup.removeEventListener("click", _mic_stop);
                     resolve();
+                });
+                close.addEventListener("click", function _close_click(e) {
+                    e.stopPropagation();
+                    close.removeEventListener("click", _close_click);
+                    reject();
                 });
             });
         },
 
-        // Returns a Promise that resolves to the choosen text.
+        // Returns a Promise that resolves to the chosen text.
         choose_item: data => {
             console.log(`SpeakToMePopup choose_item`);
+            this.inject.innerHTML = SELECTION_MARKUP;
+            const close = document.getElementById("stm-close");
+            const form = document.getElementById("stm-selection-wrapper");
+            const input = document.getElementById("stm-input");
+            const list = document.getElementById("stm-list");
+            const listWrapper = document.getElementById("stm-list-wrapper");
+            const reset = document.getElementById("stm-reset-button");
+            let firstChoice;
+
             return new Promise((resolve, reject) => {
-                let html = "<ul class='stm-list'>";
-                data.forEach(item => {
-                    html += `<li>${item.text}</li>`;
+                if (data.length === 1) {
+                    firstChoice = data[0];
+                    listWrapper.removeChild(list);
+                } else {
+                    let html = "<ul class='stm-list-inner'>";
+                    data.forEach((item, index) => {
+                        if (index === 0) {
+                            firstChoice = item;
+                        } else {
+                        html += `<li role="button" tabindex="0">${item.text}</li>`;
+                        }
+                    });
+                    html += "</ul>";
+                    list.innerHTML = html;
+                }
+
+                input.value = firstChoice.text;
+                input.size = input.value.length;
+
+                if (list) {
+                    list.style.width = `${input.offsetWidth}px`;
+                }
+
+                input.focus();
+
+                form.addEventListener("submit", function _submit_form(e) {
+                    console.log('!!!!!!!!');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    form.removeEventListener("submit", _submit_form);
+                    resolve(input.value);
                 });
-                html += "</ul>";
-                const list = this.list;
-                list.innerHTML = html;
-                list.classList.remove("hidden");
 
                 list.addEventListener("click", function _choose_item(e) {
+                    e.preventDefault();
                     list.removeEventListener("click", _choose_item);
                     if (e.target instanceof HTMLLIElement) {
                         resolve(e.target.textContent);
                     }
                 });
+
+                list.addEventListener("keypress", function _choose_item(e) {
+                    e.preventDefault();
+                    const key = e.which || e.keyCode;
+                    if (key === 13) {
+                        list.removeEventListener("click", _choose_item);
+                        if (e.target instanceof HTMLLIElement) {
+                            resolve(e.target.textContent);
+                        }
+                    }
+                });
+
+                reset.addEventListener("click", function _reset_click(e) {
+                    console.log('reject');
+                    e.preventDefault();
+                    close.removeEventListener("click", _reset_click);
+                    reject(e.target.id);
+                });
+
+                close.addEventListener("click", function _close_click(e) {
+                    e.preventDefault();
+                    close.removeEventListener("click", _close_click);
+                    reject(e.target.id);
+                });
+
             });
         }
     };
 
     // The icon that we anchor to the currently focused input element.
 
-    // TODO: figure out why using a resource in the extensions with browser.extension.getURL() fails.
-    const mic_icon_url =
-        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAQAAABLCVATAAABW0lEQVR4Ad2VJXQDMRyHU1Ljzeu6+tnKeTM7NmPUu9CYSQ38ewVXWd/5t7qaoRrz/kkuNyoz/b5cOF+vjMoS7tqY2ohuPG9EZevIW7Ph2AhuwA/BvFXrQ+vwj6F8RZE4USRf0VOc6DlP0RrEUzeiVYij4qIViKPiomWII1/REsRTadEixFNp0QLEk8vhO3WAu8z+RZzoQs2yRrP/mkHEzzhwYG6zf8LhH0dqlnrMHbFMIr+5bUT1mZs//NE8aD0bN0f+DCLWy0AS4y5z5GU35hhk69V/ByxmjnsziRrZDQXJoh7TZtpN5+TVbI0X1arUNqJMYSMUFGw8ydq4tTaCMofYSYiASUC/KpbETQLWfIjYUTahzSRMwOKUHBiUHMgWLMK0OYd/WLyDIQkfeIe7UG7BnSSAP/5KSIB6UH7B7bhLa2TbgQqLAYq4yYqK8IchX59i3BGdfzAoqsEI9//IsA+uNg0AAAAASUVORK5CYII=";
-    const mic_icon_width = 36;
-    const mic_icon_height = 36;
-
     class SpeakToMeIcon {
         constructor() {
             console.log(`SpeakToMeIcon constructor ${this}`);
-            this.icon = document.createElement("div");
-            const mic = document.createElement("img");
-            mic.src = mic_icon_url;
-            this.icon.appendChild(mic);
+            const register = getSTMAnchors(document.domain);
+            this.icon = document.createElement("button");
             this.icon.classList.add("stm-icon");
-            this.icon.classList.add("hidden");
+            this.icon.classList.add("stm-hidden");
+            this.hasAnchor = false;
+            this.input = document.getElementById(register.input);
+            this.anchor = document.getElementById(register.anchor);
+
+            if (this.input.ownerDocument !== document) {
+                return null;
+            }
+
             document.body.appendChild(this.icon);
-
-            this.icon.addEventListener("click", on_spm_icon_click);
-
-            const self = this;
-            document.body.addEventListener("focusin", event => {
-                self.anchor_to(event.target);
-            });
-
-            // Check if an element is already focused in the document.
-            if (document.hasFocus() && document.activeElement) {
-                self.anchor_to(document.activeElement);
-            }
+            this.icon.addEventListener("click", on_stm_icon_click);
+            this.input.focus();
+            this.anchor.style.position = "relative";
+            this.anchor.style.overflow = "visible";
+            this.anchor.append(this.icon);
+            this.icon.classList.remove("stm-hidden");
         }
 
-        // Checks if the input field moved around and if we need to
-        // reposition the icon.
-        update_pos() {
-            const bcr = this._input_field.getBoundingClientRect();
-            // Position the mic at the end of the input field.
-            const left =
-                bcr.width + bcr.left + window.scrollX - mic_icon_width + "px";
-            if (left !== this.icon.style.left) {
-                this.icon.style.left = left;
-            }
-            const top =
-                bcr.top +
-                window.scrollY +
-                (bcr.height - mic_icon_height) / 2 +
-                "px";
-            if (top !== this.icon.style.top) {
-                this.icon.style.top = top;
-            }
-            requestAnimationFrame(this.update_pos.bind(this));
-        }
-
-        anchor_to(target) {
-            console.log(`SpeakToMeIcon anchor_to ${target}`);
-
-            if (
-                !(
-                    target instanceof HTMLInputElement &&
-                    ["text", "email", "search"].indexOf(target.type) >= 0
-                )
-            ) {
-                return;
-            }
-
-            if (this._input_field) {
-                this._input_field.classList.remove("stm-focused");
-            }
-
-            this.icon.classList.remove("hidden");
-            this._input_field = target;
-            this._input_field.classList.add("stm-focused");
-
-            requestAnimationFrame(this.update_pos.bind(this));
-        }
 
         set_input(text) {
             console.log(`SpeakToMeIcon set_input ${text}`);
-            this._input_field.value = text;
-            this._input_field.focus();
+            this.input.value = text;
+            this.input.focus();
+            this.input.form.submit();
         }
     }
 
-    const on_spm_icon_click = event => {
+    // Main startup for STM voice stuff
+    const stm_start = () => {
         const constraints = { audio: true };
         let chunks = [];
 
@@ -279,11 +308,16 @@
                     outputNode.stream,
                     options
                 );
-                SpeakToMePopup.showAt(event.clientX, event.clientY);
 
                 SpeakToMePopup.wait_for_stop().then(() => {
                     mediaRecorder.stop();
-                });
+                }, () => {
+                    mediaRecorder.stop();
+                    SpeakToMePopup.closeClicked = true;
+                    SpeakToMePopup.hide();
+                }
+
+                );
 
                 document.getElementById("stm-levels").hidden = false;
                 visualize(analyzerNode);
@@ -291,6 +325,13 @@
                 mediaRecorder.start();
 
                 mediaRecorder.onstop = e => {
+                    // handle clicking on close element by dumping recording data
+                    if (SpeakToMePopup.closeClicked) {
+                        SpeakToMePopup.closeClicked = false;
+                        return;
+                    }
+
+                    console.log(e.target);
                     document.getElementById("stm-levels").hidden = true;
                     console.log("mediaRecorder onStop");
                     // We stopped the recording, send the content to the STT server.
@@ -317,7 +358,7 @@
                         return;
                     }
 
-                    fetch(stt_server_url, {
+                    fetch(STT_SERVER_URL, {
                         method: "POST",
                         body: blob
                     })
@@ -345,6 +386,111 @@
                 console.log(`Recording error: ${err}`);
             });
     };
+
+    // Helper for animation startup
+    const stm_init = () => {
+       loadAnimation(START_ANIMATION, false, "stm-start-animation");
+
+        setTimeout(() => {
+            const copy = document.getElementById("stm-content");
+            loadAnimation(SPINNING_ANIMATION, true);
+            copy.innerHTML = `<div id="stm-listening-text">Listening...</div>`
+            stm_start();
+        }, 1000);
+    };
+
+    // Click handler for stm icon
+    const on_stm_icon_click = event => {
+        event.preventDefault();
+        event.target.classList.add("stm-hidden");
+        SpeakToMePopup.showAt(event.clientX, event.clientY);
+        stm_init();
+    };
+
+    const on_stm_close_click = event => {
+        SpeakToMePopup.hide();
+    }
+
+    // Helper to handle background visualization
+    const visualize = (analyzerNode) => {
+        const MIN_DB_LEVEL = -85; // The dB level that is 0 in the levels display
+        const MAX_DB_LEVEL = -30; // The dB level that is 100% in the levels display
+
+        // Set up the analyzer node, and allocate an array for its data
+        // FFT size 64 gives us 32 bins. But those bins hold frequencies up to
+        // 22kHz or more, and we only care about visualizing lower frequencies
+        // which is where most human voice lies, so we use fewer bins
+        analyzerNode.fftSize = 64;
+        const frequencyBins = new Float32Array(14);
+
+        // Clear the canvas
+        const levels = document.getElementById("stm-levels");
+        const xPos = levels.offsetWidth * .5;
+        const yPos = levels.offsetHeight * .5;
+        const context = levels.getContext("2d");
+        context.clearRect(0, 0, levels.width, levels.height);
+
+        if (levels.hidden) {
+            // If we've been hidden, return right away without calling rAF again.
+            return;
+        }
+
+        // Get the FFT data
+        analyzerNode.getFloatFrequencyData(frequencyBins);
+
+        // Display it as a barchart.
+        // Drop bottom few bins, since they are often misleadingly high
+        const skip = 2;
+        const n = frequencyBins.length - skip;
+        const dbRange = MAX_DB_LEVEL - MIN_DB_LEVEL;
+
+        // Loop through the values and draw the bars
+        context.strokeStyle = "#000";
+        context.lineWidth = 10;
+        context.globalAlpha = .05
+        for (let i = 0; i < n; i++) {
+            const value = frequencyBins[i + skip];
+            const diameter = (levels.height * (value - MIN_DB_LEVEL) / dbRange) * .50;
+            if (diameter < 0) {
+                continue;
+            }
+            // Display a bar for this value.
+            context.beginPath();
+            context.ellipse(
+                xPos,
+                yPos,
+                diameter,
+                diameter,
+                0,
+                0,
+                2 * Math.PI
+            );
+            context.stroke();
+        }
+        // Update the visualization the next time we can
+        requestAnimationFrame(function() {
+            visualize(analyzerNode);
+        });
+    }
+
+    // Helper to handle bodymobin
+    const loadAnimation = (animationType, loop, className) => {
+        const container = document.getElementById("stm-box");
+        container.className = "";
+        if (className) {
+            container.classList.add(className);
+        }
+        if (window.bodymovin) {
+            window.bodymovin.destroy();
+        }
+        window.bodymovin.loadAnimation({
+            container,
+            loop,
+            renderer: "svg",
+            autoplay: true,
+            path: animationType // the path to the animation json
+        });
+    }
 
     const display_options = items => {
         // Filter the array for empty items and normalize the text.
@@ -377,12 +523,19 @@
             stm_icon.set_input(text);
             // Once a choice is made, close the popup.
             SpeakToMePopup.hide();
+        }, id => {
+            if (id === "stm-reset-button") {
+                SpeakToMePopup.reset();
+                stm_init();
+            } else {
+                SpeakToMePopup.hide();
+            }
         });
     };
 
+    const stm_icon = new SpeakToMeIcon();
     SpeakToMePopup.init();
 
-    const stm_icon = new SpeakToMeIcon();
 
     // Webrtc_Vad integration
     SpeakToMeVad = function SpeakToMeVad() {
@@ -423,6 +576,7 @@
             this.raisenovoice = false;
             this.done = false;
         };
+
         // function that returns if the specified buffer has silence of speech
         this.isSilence = function(buffer_pcm) {
             // Get data byte size, allocate memory on Emscripten heap, and get pointer
@@ -531,6 +685,7 @@
         this.goCloud = function(why) {
             console.log(why);
             this.stopGum();
+            loadAnimation(DONE_ANIMATION, false);
         };
         console.log("speakToMeVad created()");
     };
