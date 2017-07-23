@@ -12,6 +12,7 @@
         return;
     }
 
+    const metrics = new Metrics();
     const LOCAL_TEST = false;
     const STT_SERVER_URL = "https://speaktome.stage.mozaws.net";
 
@@ -77,8 +78,8 @@
                 <input id="stm-input" type="text" />
                 <div id="stm-list"></div>
             </div>
-            <button id="stm-reset-button" title="reset" type="button"></button>
-            <input id="stm-submit-button" type="submit" title="sumbit" value=""/>
+            <button id="stm-reset-button" title="Reset" type="button"></button>
+            <input id="stm-submit-button" type="submit" title="Submit" value=""/>
         </form>`;
 
     const SpeakToMePopup = {
@@ -193,7 +194,6 @@
                 });
 
                 list.addEventListener("keypress", function _choose_item(e) {
-                    e.preventDefault();
                     const key = e.which || e.keyCode;
                     if (key === 13) {
                         list.removeEventListener("click", _choose_item);
@@ -204,7 +204,6 @@
                 });
 
                 reset.addEventListener("click", function _reset_click(e) {
-                    console.log('reject');
                     e.preventDefault();
                     close.removeEventListener("click", _reset_click);
                     reject(e.target.id);
@@ -514,12 +513,14 @@
         // if the first result has a high enough confidence, just
         // use it directly.
         if (data[0].confidence > 0.9) {
+            metrics.attempt(data[0].confidence);
             stm_icon.set_input(data[0].text);
             SpeakToMePopup.hide();
             return;
         }
 
         SpeakToMePopup.choose_item(data).then(text => {
+            metrics.attempt(); // TODO: pass the confidence here
             stm_icon.set_input(text);
             // Once a choice is made, close the popup.
             SpeakToMePopup.hide();

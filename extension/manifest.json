@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Voice Fill",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Adds voice input to popular search pages in Firefox. Learn more about Voice Fill at https://testpilot.firefox.com",
   "developer": {
     "name": "Emerging Technologies Advanced Dev Team",
@@ -36,10 +36,13 @@
         "https://ca.yahoo.com/",
         "https://ca.yahoo.com/*"
       ],
-      "js": ["bodymovin.js", "content.js", "webrtc_vad.js"],
+      "js": ["bodymovin.js", "metrics.js", "content.js", "webrtc_vad.js"],
       "css": ["main.css"]
     }
   ],
+  "background": {
+    "scripts": ["testpilot-qa.js", "background.js"]
+  },
   "web_accessible_resources": [
     "Done.json", 
     "Start.json", 
