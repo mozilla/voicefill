@@ -19,6 +19,8 @@
     const DONE_ANIMATION = browser.extension.getURL("Done.json");
     const SPINNING_ANIMATION = browser.extension.getURL("Spinning.json");
     const START_ANIMATION = browser.extension.getURL("Start.json");
+    const ERROR_ANIMATION = browser.extension.getURL("Error.json");
+
 
 
     const getSTMAnchors = documentDomain => {
@@ -81,7 +83,7 @@
     // When Selecting, this markup is passed in
     const SELECTION_MARKUP = `<form id="stm-selection-wrapper">
             <div id="stm-list-wrapper">
-                <input id="stm-input" type="text" />
+                <input id="stm-input" type="text" autocomplete="off" />
                 <div id="stm-list"></div>
             </div>
             <button id="stm-reset-button" title="Reset" type="button"></button>
@@ -166,7 +168,7 @@
                     data.forEach((item, index) => {
                         if (index === 0) {
                             firstChoice = item;
-                        } else {
+                        } else if(index < 5) {
                             html += `<li idx_suggestion="${index}" confidence="${item.confidence}" role="button" tabindex="0">${item.text}</li>`;
                         }
                     });
@@ -185,10 +187,29 @@
 
                 input.focus();
 
+                input.addEventListener("keydown", function _expand_input(e) {
+                    // e.preventDefault();
+                    if(e.keyCode == 13) {
+                        e.preventDefault();
+                        list.classList.add('close');
+                        resolve(input.value);
+                    }
+                    else if(e.keyCode == 8) {
+                        input.size--;
+                        list.style.width = `${input.offsetWidth}px`;
+                    }
+                    else {
+                        input.size = input.value.length;
+                        list.style.width = `${input.offsetWidth}px`;
+                    }
+                });
+
+
                 form.addEventListener("submit", function _submit_form(e) {
                     console.log('!!!!!!!!');
                     e.preventDefault();
                     e.stopPropagation();
+                    list.classList.add('close');
                     form.removeEventListener("submit", _submit_form);
                     resolve(input);
                 });
@@ -201,7 +222,16 @@
                         result.confidence = e.target.getAttribute("confidence");
                         result.value = e.target.textContent;
                         result.idx_suggestion = e.target.getAttribute("idx_suggestion");
-                        resolve(result);
+                        
+                        list.classList.add('close');
+                        
+                        input.value = e.target.textContent;
+                        input.size = input.value.length;
+                        list.style.width = `${input.offsetWidth}px`;
+
+                        setTimeout(() => {
+                            resolve(result);
+                        }, 75);
                     }
                 });
 
@@ -341,6 +371,11 @@
                 mediaRecorder.start();
                 metrics.start_recording();
 
+                const copy = document.getElementById("stm-content");
+                loadAnimation(SPINNING_ANIMATION, true);
+                copy.innerHTML = `<div id="stm-listening-text">Listening...</div>`
+
+
                 mediaRecorder.onstop = e => {
                      metrics.stop_recording();
                     // handle clicking on close element by dumping recording data
@@ -403,18 +438,22 @@
                 };
             })
             .catch(function(err) {
+                loadAnimation(ERROR_ANIMATION, false);
+                const copy = document.getElementById("stm-content");
+                copy.innerHTML = `<div id="stm-listening-text">Microphone access error</div>`
+                setTimeout(() => {
+                    SpeakToMePopup.hide();
+                }, 1500);
+
                 console.log(`Recording error: ${err}`);
             });
     };
 
     // Helper for animation startup
     const stm_init = () => {
-       loadAnimation(START_ANIMATION, false, "stm-start-animation");
+       loadAnimation(START_ANIMATION, true, "stm-start-animation");
 
         setTimeout(() => {
-            const copy = document.getElementById("stm-content");
-            loadAnimation(SPINNING_ANIMATION, true);
-            copy.innerHTML = `<div id="stm-listening-text">Listening...</div>`
             stm_start();
         }, 1000);
     };
@@ -466,16 +505,21 @@
         const dbRange = MAX_DB_LEVEL - MIN_DB_LEVEL;
 
         // Loop through the values and draw the bars
-        context.strokeStyle = "#000";
+        context.strokeStyle = "#d1d2d3";
         context.lineWidth = 10;
         context.globalAlpha = .05
         for (let i = 0; i < n; i++) {
             const value = frequencyBins[i + skip];
-            const diameter = (levels.height * (value - MIN_DB_LEVEL) / dbRange) * .50;
+            const diameter = (levels.height * (value - MIN_DB_LEVEL) / dbRange) * 2;
             if (diameter < 0) {
                 continue;
             }
             // Display a bar for this value.
+            var alpha = diameter/800;
+            if(alpha > .2) alpha = .2;
+            context.lineWidth = alpha*alpha*500;
+            context.globalAlpha = alpha*alpha*5;
+
             context.beginPath();
             context.ellipse(
                 xPos,
@@ -486,7 +530,7 @@
                 0,
                 2 * Math.PI
             );
-            context.stroke();
+            if(diameter > 90 && diameter < 350) context.stroke();
         }
         // Update the visualization the next time we can
         requestAnimationFrame(function() {
