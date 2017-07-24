@@ -179,7 +179,7 @@
 
                 input.focus();
 
-                input.addEventListener("keydown", function _expand_input(e) {
+                input.addEventListener("keypress", function _expand_input(e) {
                 	// e.preventDefault();
                 	if(e.keyCode == 13) {
                 		e.preventDefault();
@@ -190,7 +190,7 @@
                 		input.size--;
                 		list.style.width = `${input.offsetWidth}px`;
                 	}
-                	else {
+                	else if(e.keyCode < 37 || e.keyCode > 40) {
                 		input.size = input.value.length;
                 		list.style.width = `${input.offsetWidth}px`;
                 	}
@@ -211,7 +211,6 @@
                     list.removeEventListener("click", _choose_item);
                     if (e.target instanceof HTMLLIElement) {
 						list.classList.add('close');
-                        
 						input.value = e.target.textContent;
                     	input.size = input.value.length;
                     	list.style.width = `${input.offsetWidth}px`;
@@ -227,7 +226,14 @@
                     if (key === 13) {
                         list.removeEventListener("click", _choose_item);
                         if (e.target instanceof HTMLLIElement) {
-                            resolve(e.target.textContent);
+                            list.classList.add('close');
+							input.value = e.target.textContent;
+	                    	input.size = input.value.length;
+	                    	list.style.width = `${input.offsetWidth}px`;
+
+							setTimeout(() => {
+					            resolve(e.target.textContent);
+					        }, 75);
                         }
                     }
                 });
@@ -402,9 +408,13 @@
                             console.log(
                                 `Got STT result: ${JSON.stringify(json)}`
                             );
-                            if (json.status === "ok") {
-                                display_options(json.data);
-                            }
+                            const container = document.getElementById("stm-box");
+                            container.classList.add('stm-done-animation');
+                            setTimeout(() => {
+					            if (json.status === "ok") {
+                                	display_options(json.data);
+                            	}
+					        }, 500);
                         })
                         .catch(error => {
                             console.error(`Fetch error: ${error}`);
@@ -429,7 +439,7 @@
 
     // Helper for animation startup
     const stm_init = () => {
-       loadAnimation(START_ANIMATION, true, "stm-start-animation");
+       loadAnimation(START_ANIMATION, false, "stm-start-animation");
 
         setTimeout(() => {
             stm_start();
@@ -483,20 +493,19 @@
 
         // Loop through the values and draw the bars
 		context.strokeStyle = "#d1d2d3";
-        context.lineWidth = 10;
-        context.globalAlpha = .05
         for (let i = 0; i < n; i++) {
             const value = frequencyBins[i + skip];
-            const diameter = (levels.height * (value - MIN_DB_LEVEL) / dbRange) * 2;
+            const diameter = (levels.height * (value - MIN_DB_LEVEL) / dbRange) * 10;
             if (diameter < 0) {
                 continue;
             }
             // Display a bar for this value.
-			var alpha = diameter/800;
+			var alpha = diameter/500;
             if(alpha > .2) alpha = .2;
-            context.lineWidth = alpha*alpha*500;
+            else if (alpha < .1) alpha = .1;
+            
+            context.lineWidth = alpha*alpha*150;
             context.globalAlpha = alpha*alpha*5;
-
             context.beginPath();
             context.ellipse(
                 xPos,
@@ -507,7 +516,7 @@
                 0,
                 2 * Math.PI
             );
-            if(diameter > 90 && diameter < 350) context.stroke();
+            if(diameter > 90 && diameter < 360) context.stroke();
         }
         // Update the visualization the next time we can
         requestAnimationFrame(function() {
@@ -729,6 +738,8 @@
         this.goCloud = function(why) {
             console.log(why);
             this.stopGum();
+            const copy = document.getElementById("stm-content");
+	        copy.innerHTML = `<div id="stm-listening-text">Processing...</div>`
             loadAnimation(DONE_ANIMATION, false);
         };
         console.log("speakToMeVad created()");
