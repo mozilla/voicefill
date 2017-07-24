@@ -180,20 +180,20 @@
                 input.focus();
 
                 input.addEventListener("keypress", function _expand_input(e) {
-                	// e.preventDefault();
-                	if(e.keyCode == 13) {
-                		e.preventDefault();
-                		list.classList.add('close');
-                    	resolve(input.value);
-                	}
-                	else if(e.keyCode == 8) {
-                		input.size--;
-                		list.style.width = `${input.offsetWidth}px`;
-                	}
-                	else if(e.keyCode < 37 || e.keyCode > 40) {
-                		input.size = input.value.length;
-                		list.style.width = `${input.offsetWidth}px`;
-                	}
+                    // e.preventDefault();
+                    if(e.keyCode == 13) {
+                        e.preventDefault();
+                        list.classList.add('close');
+                        resolve(input.value);
+                    }
+                    else if(e.keyCode == 8) {
+                        input.size--;
+                        list.style.width = `${input.offsetWidth}px`;
+                    }
+                    else if(e.keyCode < 37 || e.keyCode > 40) {
+                        input.size = input.value.length;
+                        list.style.width = `${input.offsetWidth}px`;
+                    }
                 });
 
 
@@ -210,14 +210,14 @@
                     e.preventDefault();
                     list.removeEventListener("click", _choose_item);
                     if (e.target instanceof HTMLLIElement) {
-						list.classList.add('close');
-						input.value = e.target.textContent;
-                    	input.size = input.value.length;
-                    	list.style.width = `${input.offsetWidth}px`;
+                        list.classList.add('close');
+                        input.value = e.target.textContent;
+                        input.size = input.value.length;
+                        list.style.width = `${input.offsetWidth}px`;
 
-						setTimeout(() => {
-				            resolve(e.target.textContent);
-				        }, 75);
+                        setTimeout(() => {
+                            resolve(e.target.textContent);
+                        }, 75);
                     }
                 });
 
@@ -227,13 +227,13 @@
                         list.removeEventListener("click", _choose_item);
                         if (e.target instanceof HTMLLIElement) {
                             list.classList.add('close');
-							input.value = e.target.textContent;
-	                    	input.size = input.value.length;
-	                    	list.style.width = `${input.offsetWidth}px`;
+                            input.value = e.target.textContent;
+                            input.size = input.value.length;
+                            list.style.width = `${input.offsetWidth}px`;
 
-							setTimeout(() => {
-					            resolve(e.target.textContent);
-					        }, 75);
+                            setTimeout(() => {
+                                resolve(e.target.textContent);
+                            }, 75);
                         }
                     }
                 });
@@ -358,9 +358,9 @@
 
                 mediaRecorder.start();
 
-				const copy = document.getElementById("stm-content");
-	            loadAnimation(SPINNING_ANIMATION, true);
-	            copy.innerHTML = `<div id="stm-listening-text">Listening...</div>`
+                const copy = document.getElementById("stm-content");
+                loadAnimation(SPINNING_ANIMATION, true);
+                copy.innerHTML = `<div id="stm-listening-text">Listening...</div>`
 
 
                 mediaRecorder.onstop = e => {
@@ -411,10 +411,10 @@
                             const container = document.getElementById("stm-box");
                             container.classList.add('stm-done-animation');
                             setTimeout(() => {
-					            if (json.status === "ok") {
-                                	display_options(json.data);
-                            	}
-					        }, 500);
+                                if (json.status === "ok") {
+                                    display_options(json.data);
+                                }
+                            }, 500);
                         })
                         .catch(error => {
                             console.error(`Fetch error: ${error}`);
@@ -426,12 +426,12 @@
                 };
             })
             .catch(function(err) {
-				loadAnimation(ERROR_ANIMATION, false);
+                loadAnimation(ERROR_ANIMATION, false);
                 const copy = document.getElementById("stm-content");
-	            copy.innerHTML = `<div id="stm-listening-text">Microphone access error</div>`
+                copy.innerHTML = `<div id="stm-listening-text">Microphone access error</div>`
                 setTimeout(() => {
-		            SpeakToMePopup.hide();
-		        }, 1500);
+                    SpeakToMePopup.hide();
+                }, 1500);
 
                 console.log(`Recording error: ${err}`);
             });
@@ -492,7 +492,7 @@
         const dbRange = MAX_DB_LEVEL - MIN_DB_LEVEL;
 
         // Loop through the values and draw the bars
-		context.strokeStyle = "#d1d2d3";
+        context.strokeStyle = "#d1d2d3";
         for (let i = 0; i < n; i++) {
             const value = frequencyBins[i + skip];
             const diameter = (levels.height * (value - MIN_DB_LEVEL) / dbRange) * 10;
@@ -500,7 +500,7 @@
                 continue;
             }
             // Display a bar for this value.
-			var alpha = diameter/500;
+            var alpha = diameter/500;
             if(alpha > .2) alpha = .2;
             else if (alpha < .1) alpha = .1;
             
@@ -739,7 +739,7 @@
             console.log(why);
             this.stopGum();
             const copy = document.getElementById("stm-content");
-	        copy.innerHTML = `<div id="stm-listening-text">Processing...</div>`
+            copy.innerHTML = `<div id="stm-listening-text">Processing...</div>`
             loadAnimation(DONE_ANIMATION, false);
         };
         console.log("speakToMeVad created()");
