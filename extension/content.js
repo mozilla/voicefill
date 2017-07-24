@@ -188,20 +188,20 @@
                 input.focus();
 
                 input.addEventListener("keypress", function _expand_input(e) {
-                	// e.preventDefault();
-                	if(e.keyCode == 13) {
-                		e.preventDefault();
-                		list.classList.add('close');
-                    	resolve(input.value);
-                	}
-                	else if(e.keyCode == 8) {
-                		input.size--;
-                		list.style.width = `${input.offsetWidth}px`;
-                	}
-                	else if(e.keyCode < 37 || e.keyCode > 40) {
-                		input.size = input.value.length;
-                		list.style.width = `${input.offsetWidth}px`;
-                	}
+                    // e.preventDefault();
+                    if(e.keyCode == 13) {
+                        e.preventDefault();
+                        list.classList.add('close');
+                        resolve(input.value);
+                    }
+                    else if(e.keyCode == 8) {
+                        input.size--;
+                        list.style.width = `${input.offsetWidth}px`;
+                    }
+                    else if(e.keyCode < 37 || e.keyCode > 40) {
+                        input.size = input.value.length;
+                        list.style.width = `${input.offsetWidth}px`;
+                    }
                 });
 
 
@@ -222,7 +222,7 @@
                         result.confidence = e.target.getAttribute("confidence");
                         result.value = e.target.textContent;
                         result.idx_suggestion = e.target.getAttribute("idx_suggestion");
-                        
+                       
                         list.classList.add('close');
                         input.value = e.target.textContent;
                         input.size = input.value.length;
@@ -245,9 +245,9 @@
                             result.idx_suggestion = e.target.getAttribute("idx_suggestion");
 
                             list.classList.add('close');
-							input.value = e.target.textContent;
-	                    	input.size = input.value.length;
-	                    	list.style.width = `${input.offsetWidth}px`;
+                            input.value = e.target.textContent;
+                            input.size = input.value.length;
+                            list.style.width = `${input.offsetWidth}px`;
 
 							setTimeout(() => {
 					            resolve(result);
@@ -434,10 +434,10 @@
                             const container = document.getElementById("stm-box");
                             container.classList.add('stm-done-animation');
                             setTimeout(() => {
-					            if (json.status === "ok") {
-                                	display_options(json.data);
-                            	}
-					        }, 500);
+                                if (json.status === "ok") {
+                                    display_options(json.data);
+                                }
+                            }, 500);
                         })
                         .catch(error => {
                             console.error(`Fetch error: ${error}`);
@@ -516,13 +516,8 @@
         const dbRange = MAX_DB_LEVEL - MIN_DB_LEVEL;
 
         // Loop through the values and draw the bars
-<<<<<<< c0f932072f9f93582e3d557aa4538d48cc44e375
         context.strokeStyle = "#d1d2d3";
-        context.lineWidth = 10;
-        context.globalAlpha = .05
-=======
-		context.strokeStyle = "#d1d2d3";
->>>>>>> modify motion
+
         for (let i = 0; i < n; i++) {
             const value = frequencyBins[i + skip];
             const diameter = (levels.height * (value - MIN_DB_LEVEL) / dbRange) * 10;
@@ -530,11 +525,7 @@
                 continue;
             }
             // Display a bar for this value.
-<<<<<<< c0f932072f9f93582e3d557aa4538d48cc44e375
-            var alpha = diameter/800;
-=======
-			var alpha = diameter/500;
->>>>>>> modify motion
+            var alpha = diameter/500;
             if(alpha > .2) alpha = .2;
             else if (alpha < .1) alpha = .1;
             
@@ -778,7 +769,7 @@
             console.log(why);
             this.stopGum();
             const copy = document.getElementById("stm-content");
-	        copy.innerHTML = `<div id="stm-listening-text">Processing...</div>`
+            copy.innerHTML = `<div id="stm-listening-text">Processing...</div>`
             loadAnimation(DONE_ANIMATION, false);
         };
         console.log("speakToMeVad created()");
