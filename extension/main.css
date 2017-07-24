@@ -51,11 +51,6 @@
     top: -9px;
 }
 
-.stm-done-animation {
-    opacity: 0;
-    transition: opacity 2s;
-}
-
 #stm-header {
     width: 100%;
     flex: 20px auto;
@@ -124,7 +119,15 @@
 }
 
 .stm-start-animation {
-    filter: grayscale(100%);
+    opacity: 0;
+    transform: translateY(-20px);
+    /*filter: grayscale(100%);*/
+    animation: drop 500ms forwards 250ms;
+}
+
+.stm-done-animation {
+    transform-origin: center 100%;
+    animation: leave 450ms forwards;
 }
 
 #stm-levels-wrapper {
@@ -319,6 +322,7 @@
 
 .stm-icon.stm-hidden {
     opacity: .1;
+    pointer-events: none;
 }
 
 
@@ -386,5 +390,40 @@
     100% {
         opacity: 1;
         transform: scaleY(1);
+    }
+}
+
+@keyframes drop {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+}
+
+@keyframes leave {
+    0% {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+    30% {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+
+    80% {
+        opacity: 1;
+        transform: scaleY(.9);
+    }
+    100% {
+        opacity: 0;
+        transform: scaleY(1.1);
+        transform: translateY(-100px);
     }
 }

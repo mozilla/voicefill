@@ -187,21 +187,21 @@
 
                 input.focus();
 
-                input.addEventListener("keydown", function _expand_input(e) {
-                    // e.preventDefault();
-                    if(e.keyCode == 13) {
-                        e.preventDefault();
-                        list.classList.add('close');
-                        resolve(input.value);
-                    }
-                    else if(e.keyCode == 8) {
-                        input.size--;
-                        list.style.width = `${input.offsetWidth}px`;
-                    }
-                    else {
-                        input.size = input.value.length;
-                        list.style.width = `${input.offsetWidth}px`;
-                    }
+                input.addEventListener("keypress", function _expand_input(e) {
+                	// e.preventDefault();
+                	if(e.keyCode == 13) {
+                		e.preventDefault();
+                		list.classList.add('close');
+                    	resolve(input.value);
+                	}
+                	else if(e.keyCode == 8) {
+                		input.size--;
+                		list.style.width = `${input.offsetWidth}px`;
+                	}
+                	else if(e.keyCode < 37 || e.keyCode > 40) {
+                		input.size = input.value.length;
+                		list.style.width = `${input.offsetWidth}px`;
+                	}
                 });
 
 
@@ -224,7 +224,6 @@
                         result.idx_suggestion = e.target.getAttribute("idx_suggestion");
                         
                         list.classList.add('close');
-                        
                         input.value = e.target.textContent;
                         input.size = input.value.length;
                         list.style.width = `${input.offsetWidth}px`;
@@ -244,7 +243,15 @@
                             result.confidence = e.target.getAttribute("confidence");
                             result.value = e.target.textContent;
                             result.idx_suggestion = e.target.getAttribute("idx_suggestion");
-                            resolve(result);
+
+                            list.classList.add('close');
+							input.value = e.target.textContent;
+	                    	input.size = input.value.length;
+	                    	list.style.width = `${input.offsetWidth}px`;
+
+							setTimeout(() => {
+					            resolve(result);
+					        }, 75);
                         }
                     }
                 });
@@ -424,9 +431,13 @@
                             console.log(
                                 `Got STT result: ${JSON.stringify(json)}`
                             );
-                            if (json.status === "ok") {
-                                display_options(json.data);
-                            }
+                            const container = document.getElementById("stm-box");
+                            container.classList.add('stm-done-animation');
+                            setTimeout(() => {
+					            if (json.status === "ok") {
+                                	display_options(json.data);
+                            	}
+					        }, 500);
                         })
                         .catch(error => {
                             console.error(`Fetch error: ${error}`);
@@ -451,7 +462,7 @@
 
     // Helper for animation startup
     const stm_init = () => {
-       loadAnimation(START_ANIMATION, true, "stm-start-animation");
+       loadAnimation(START_ANIMATION, false, "stm-start-animation");
 
         setTimeout(() => {
             stm_start();
@@ -505,21 +516,30 @@
         const dbRange = MAX_DB_LEVEL - MIN_DB_LEVEL;
 
         // Loop through the values and draw the bars
+<<<<<<< c0f932072f9f93582e3d557aa4538d48cc44e375
         context.strokeStyle = "#d1d2d3";
         context.lineWidth = 10;
         context.globalAlpha = .05
+=======
+		context.strokeStyle = "#d1d2d3";
+>>>>>>> modify motion
         for (let i = 0; i < n; i++) {
             const value = frequencyBins[i + skip];
-            const diameter = (levels.height * (value - MIN_DB_LEVEL) / dbRange) * 2;
+            const diameter = (levels.height * (value - MIN_DB_LEVEL) / dbRange) * 10;
             if (diameter < 0) {
                 continue;
             }
             // Display a bar for this value.
+<<<<<<< c0f932072f9f93582e3d557aa4538d48cc44e375
             var alpha = diameter/800;
+=======
+			var alpha = diameter/500;
+>>>>>>> modify motion
             if(alpha > .2) alpha = .2;
-            context.lineWidth = alpha*alpha*500;
+            else if (alpha < .1) alpha = .1;
+            
+            context.lineWidth = alpha*alpha*150;
             context.globalAlpha = alpha*alpha*5;
-
             context.beginPath();
             context.ellipse(
                 xPos,
@@ -530,7 +550,7 @@
                 0,
                 2 * Math.PI
             );
-            if(diameter > 90 && diameter < 350) context.stroke();
+            if(diameter > 90 && diameter < 360) context.stroke();
         }
         // Update the visualization the next time we can
         requestAnimationFrame(function() {
@@ -757,6 +777,8 @@
         this.goCloud = function(why) {
             console.log(why);
             this.stopGum();
+            const copy = document.getElementById("stm-content");
+	        copy.innerHTML = `<div id="stm-listening-text">Processing...</div>`
             loadAnimation(DONE_ANIMATION, false);
         };
         console.log("speakToMeVad created()");
