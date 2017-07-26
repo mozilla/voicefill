@@ -48,11 +48,7 @@
     justify-content: center;
     position: relative;
     width: 100%;
-}
-
-.stm-done-animation {
-    opacity: 0;
-    transition: opacity 2s;
+    top: -9px;
 }
 
 #stm-header {
@@ -83,9 +79,9 @@
 #stm-feedback {
     background-color: #00C8D7;
     background-image: url('assets/feedback.svg');
-    background-position: 4px 4px;
+    background-position: 2px 4px;
     background-repeat: no-repeat;
-    background-size: 14px;
+    background-size: 18px;
     border: 1px solid  #00C8D7;
     border-radius: 3px;
     box-shadow: 0 1px 2px rgba(0,0,0,.1);
@@ -93,34 +89,52 @@
     cursor: pointer;
     display: block;
     float: right;
-    font-size: 10px;
+    font-size: 12px;
     line-height: 12px;
-    padding: 4px 6px 4px 20px;
+    padding: 5px;
+    overflow: hidden;
     position: absolute;
     bottom: 2em;
     right: 2em;
     z-index: 11;
     opacity: .7;
+    width: 12px;
+    text-indent: 17px;
+    transition: all 150ms ease-in-out;
 }
 
 #stm-feedback:hover,
 #stm-feedback:focus {
     background-color: #00b8c7;
+    text-decoration: none;
+    width: 57px;
+    text-indent: 2px;
+    padding: 5px 5px 5px 20px;
+    transition: all 150ms ease-in-out;
 }
 
 #stm-feedback:active {
     background-color: #00b8c7;
+    text-decoration: none;
 }
 
 #stm-animation-wrapper {
     background: transparent;
-    height: 200px;
+    height: 150px;
     position: relative;
     width: 400px;
 }
 
 .stm-start-animation {
-    filter: grayscale(100%);
+    opacity: 0;
+    transform: translateY(-20px);
+    /*filter: grayscale(100%);*/
+    animation: drop 500ms forwards 250ms;
+}
+
+.stm-done-animation {
+    transform-origin: center 100%;
+    animation: leave 450ms forwards;
 }
 
 #stm-levels-wrapper {
@@ -141,7 +155,7 @@
 
 #stm-box {
     background: none;
-    height: 200px;
+    height: 150px;
     overflow: hidden;
     position: relative;
     width: 400px;
@@ -153,6 +167,8 @@
     font-size: 22px;
     height: 24px;
     position: relative;
+    font-weight: 300;
+    letter-spacing: .5px;
 }
 
 #stm-intro-text {
@@ -188,6 +204,7 @@
     opacity: 0;
     padding: 4px 8px;
     position: relative;
+    max-width: 20vw;
     transition: background 75ms, box-shadow 75ms;
 }
 
@@ -215,18 +232,22 @@
     transform: scaleY(0);
 }
 
+#stm-list.close {
+    animation: scale 150ms backwards ease-in-out;
+}
+
 .stm-list-inner {
     box-sizing: border-box;
     list-style: none;
     margin: 0;
-    padding: 5px;
+    padding: 0px;
     width: 100%;
 }
 
 .stm-list-inner li {
     cursor: pointer;
     opacity: .8;
-    padding: 5px 2px;
+    padding: 10px 7px;
     transition: background 50ms, opacity 50ms;
 }
 
@@ -246,10 +267,9 @@
     background-size: 16px 16px;
     border-radius: 50%;
     border: 1px solid #F0F0F0;
-    border: none;
     cursor: pointer;
     height: 40px;
-    margin: 0 40px;
+    margin: 0 24px 0 40px;
     opacity: 0;
     transition: background-color 50ms;
     width: 40px;
@@ -309,6 +329,7 @@
 
 .stm-icon.stm-hidden {
     opacity: .1;
+    pointer-events: none;
 }
 
 
@@ -376,5 +397,40 @@
     100% {
         opacity: 1;
         transform: scaleY(1);
+    }
+}
+
+@keyframes drop {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+}
+
+@keyframes leave {
+    0% {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+    30% {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+
+    80% {
+        opacity: 1;
+        transform: scaleY(.9);
+    }
+    100% {
+        opacity: 0;
+        transform: scaleY(1.1);
+        transform: translateY(-100px);
     }
 }
