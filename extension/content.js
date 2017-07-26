@@ -181,12 +181,12 @@
 
                 input.addEventListener("keypress", function _expand_input(e) {
                     // e.preventDefault();
-                    if(e.keyCode == 13) {
+                    if(e.keyCode === 13) {
                         e.preventDefault();
                         list.classList.add('close');
                         resolve(input.value);
                     }
-                    else if(e.keyCode == 8) {
+                    else if(e.keyCode === 8) {
                         input.size--;
                         list.style.width = `${input.offsetWidth}px`;
                     }
@@ -198,7 +198,6 @@
 
 
                 form.addEventListener("submit", function _submit_form(e) {
-                    console.log('!!!!!!!!');
                     e.preventDefault();
                     e.stopPropagation();
                     list.classList.add('close');

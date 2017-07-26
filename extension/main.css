@@ -92,6 +92,7 @@
     font-size: 12px;
     line-height: 12px;
     padding: 5px;
+    overflow: hidden;
     position: absolute;
     bottom: 2em;
     right: 2em;
