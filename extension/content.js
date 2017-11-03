@@ -279,6 +279,8 @@
         }
     }
     browser.runtime.onMessage.addListener(request => {
+      this.icon.classList.add("stm-hidden");
+      document.getElementsByClassName("stm-icon")[0].disabled = true;
       SpeakToMePopup.showAt(0, 0);
       stm_init();
       return Promise.resolve({response: "content script ack"});
