@@ -7,7 +7,7 @@
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         console.error(
-            "You need a browser with getUserMedia support to use Speak To Me, sorry!"
+            "You need a chrome with getUserMedia support to use Speak To Me, sorry!"
         );
         return;
     }
@@ -15,12 +15,12 @@
     let mediaRecorder = null;
     const metrics = new Metrics();
     const LOCAL_TEST = false;
-    const STT_SERVER_URL = "https://speaktome.services.mozilla.com";
+    const STT_SERVER_URL = "http://127.0.0.1:9001";
 
-    const DONE_ANIMATION = browser.extension.getURL("Done.json");
-    const SPINNING_ANIMATION = browser.extension.getURL("Spinning.json");
-    const START_ANIMATION = browser.extension.getURL("Start.json");
-    const ERROR_ANIMATION = browser.extension.getURL("Error.json");
+    const DONE_ANIMATION = chrome.extension.getURL("Done.json");
+    const SPINNING_ANIMATION = chrome.extension.getURL("Spinning.json");
+    const START_ANIMATION = chrome.extension.getURL("Start.json");
+    const ERROR_ANIMATION = chrome.extension.getURL("Error.json");
 
     const getSTMAnchors = documentDomain => {
         switch (documentDomain) {
@@ -278,7 +278,7 @@
                 return null;
         }
     }
-    browser.runtime.onMessage.addListener(request => {
+    chrome.runtime.onMessage.addListener(request => {
       this.icon.classList.add("stm-hidden");
       document.getElementsByClassName("stm-icon")[0].disabled = true;
       metrics.start_session("toolbar");
@@ -567,18 +567,19 @@
                 // and set up the recorder
                 const options = {
                     audioBitsPerSecond: 16000,
-                    mimeType: "audio/ogg"
+                    mimeType: "audio/webm"
                 };
 
                 // VAD initializations
                 // console.log("Sample rate: ", audioContext.sampleRate);
-                const bufferSize = 2048;
+                const bufferSize = 4096;
                 // create a javascript node
                 let scriptprocessor = audioContext.createScriptProcessor(
                     bufferSize,
                     1,
                     1
                 );
+                scriptprocessor.connect(audioContext.destination);
                 // specify the processing function
                 stm_vad.reset();
                 scriptprocessor.onaudioprocess = stm_vad.recorderProcess;
@@ -641,7 +642,7 @@
                     scriptprocessor = null;
 
                     const blob = new Blob(chunks, {
-                        type: "audio/ogg; codecs=opus"
+                        type: "audio/webm; codecs=opus"
                     });
                     chunks = [];
 
@@ -878,10 +879,11 @@
     SpeakToMePopup.init();
 
     const fail_gracefully = (errorMsg) => {
+      console.log("ERROR: ", errorMsg);
       if (errorMsg.indexOf("GUM") === 0) {
         errorMsg =  "Please enable your microphone to use Voice Fill";
       } else if (errorMsg.indexOf("EMPTYRESULTS") === 0) {
-        errorMsg = "No results found";  
+        errorMsg = "No results found";
       } else {
         errorMsg = "Sorry, we encountered an error";
       }
@@ -891,7 +893,6 @@
       setTimeout(() => {
           SpeakToMePopup.hide();
       }, 1500);
-      console.log('ERROR: ', errorMsg);
     }
 
     // Webrtc_Vad integration
@@ -955,6 +956,7 @@
                 buffer_pcm[100],
                 buffer_pcm[2000]
             );
+            console.log(result);
             // Free memory
             Module._free(dataHeap.byteOffset);
             return result;

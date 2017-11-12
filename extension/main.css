@@ -6,7 +6,7 @@
     align-items: stretch;
     animation-fill-mode: forwards;
     background-color: white;
-    background-image: url('assets/ff-logo.png');
+    background-image: url('chrome-extension://__MSG_@@extension_id__/assets/ff-logo.png');
     background-position: bottom 2em left 2em;
     background-repeat: no-repeat;
     background-size: 63px 23px;
@@ -62,7 +62,7 @@
 }
 
 #stm-close {
-    background: url('assets/icon-close.svg');
+    background-image: url('chrome-extension://__MSG_@@extension_id__/assets/icon-close.svg');
     background-position: center center;
     background-repeat: no-repeat;
     background-size: 20px 20px;
@@ -83,7 +83,7 @@
 
 #stm-feedback {
     background-color: #00C8D7;
-    background-image: url('assets/feedback.svg');
+    background-image: url('chrome-extension://__MSG_@@extension_id__/assets/feedback.svg');
     background-position: 2px 4px;
     background-repeat: no-repeat;
     background-size: 18px;
@@ -263,7 +263,7 @@
     animation: pop forwards 300ms ease-in;
     animation-delay: 150ms;
     background-color: transparent;
-    background-image: url('assets/icon-redo.svg');
+    background-image: url('chrome-extension://__MSG_@@extension_id__/assets/icon-redo.svg');
     background-position: center center;
     background-repeat: no-repeat;
     background-size: 16px 16px;
@@ -289,7 +289,7 @@
     animation: pop forwards 300ms ease-in;
     animation-delay: 300ms;
     background-color: #00C8D7;
-    background-image: url('assets/icon-done.svg');
+    background-image: url('chrome-extension://__MSG_@@extension_id__/assets/icon-done.svg');
     background-position: center center;
     background-repeat: no-repeat;
     background-size: 32px 28px;
@@ -306,7 +306,7 @@
 
 .stm-icon {
     background-color: #00C8D7;
-    background-image: url('assets/icon-mic.svg');
+    background-image: url('chrome-extension://__MSG_@@extension_id__/assets/icon-mic.svg');
     background-position: center center;
     background-repeat: no-repeat;
     background-size: 24px 24px;

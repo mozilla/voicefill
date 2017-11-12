@@ -76,9 +76,9 @@ class Metrics {
 
     sendMessage(event, content) {
         const message = { "type": event, "content": content};
-        const sendingMessage = browser.runtime.sendMessage(message);
-        sendingMessage.then(result => {
+        const sendingMessage = chrome.runtime.sendMessage(message);
+        /*sendingMessage.then(result => {
             console.log("[metrics] Sent message to background script");
-        });
+        });*/
     }
 }

@@ -12,7 +12,7 @@ const analytics = new TestPilotGA({
   av: '1.3.1'
 });
 
-browser.runtime.onMessage.addListener(event => {
+chrome.runtime.onMessage.addListener(event => {
     console.log('[metrics] Event successfully sent. Calling analytics');
 
     analytics
@@ -25,15 +25,15 @@ browser.runtime.onMessage.addListener(event => {
     });
 });
 
-browser.browserAction.onClicked.addListener(function() {
+chrome.browserAction.onClicked.addListener(function() {
 
-  var creating = browser.tabs.create({
+  var creating = chrome.tabs.create({
     url:"https://www.google.com"
   });
   creating.
   then(tab => {
             const intervalConnection = setInterval( function() {
-                browser.tabs.sendMessage(
+                chrome.tabs.sendMessage(
                     tab.id,
                     {msg: "background script syn"}
                 ).then(response => {
