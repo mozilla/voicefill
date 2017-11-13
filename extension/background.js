@@ -29,23 +29,16 @@ chrome.browserAction.onClicked.addListener(function() {
 
   var creating = chrome.tabs.create({
     url:"https://www.google.com"
-  });
-  creating.
-  then(tab => {
+  }, (tab) => {
             const intervalConnection = setInterval( function() {
                 chrome.tabs.sendMessage(
                     tab.id,
-                    {msg: "background script syn"}
-                ).then(response => {
-                    clearInterval(intervalConnection);
-                }).catch(error => {
-                    //console.error(`Not connected yet. Retrying ${error}`);
-                });
-
-            }, 100);
-
-        },
-          error => {
-            console.log(`Error: ${error}`);
-        });
+                    {msg: "background script syn"},
+                    null,
+                    () => {
+                        clearInterval(intervalConnection);
+                    }
+                );
+            }, 500);
+  });
 });

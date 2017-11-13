@@ -15,7 +15,7 @@
     let mediaRecorder = null;
     const metrics = new Metrics();
     const LOCAL_TEST = false;
-    const STT_SERVER_URL = "http://127.0.0.1:9001";
+    const STT_SERVER_URL = "https://speech.mozilla-iot.pw";
 
     const DONE_ANIMATION = chrome.extension.getURL("Done.json");
     const SPINNING_ANIMATION = chrome.extension.getURL("Spinning.json");
@@ -956,7 +956,6 @@
                 buffer_pcm[100],
                 buffer_pcm[2000]
             );
-            console.log(result);
             // Free memory
             Module._free(dataHeap.byteOffset);
             return result;

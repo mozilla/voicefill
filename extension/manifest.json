@@ -488,9 +488,6 @@
 
   "browser_action": {
     "browser_style": true,
-    "default_icon": {
-      "16": "mic.svg",
-      "32": "mic.svg"
+    "default_icon": "assets/micpng.png"
     }
-  }
 }
