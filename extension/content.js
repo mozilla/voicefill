@@ -572,7 +572,7 @@
 
                 // VAD initializations
                 // console.log("Sample rate: ", audioContext.sampleRate);
-                const bufferSize = 4096;
+                const bufferSize = 2048;
                 // create a javascript node
                 let scriptprocessor = audioContext.createScriptProcessor(
                     bufferSize,
