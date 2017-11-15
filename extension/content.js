@@ -15,7 +15,7 @@
     let mediaRecorder = null;
     const metrics = new Metrics();
     const LOCAL_TEST = false;
-    const STT_SERVER_URL = "https://speech.mozilla-iot.pw";
+    const STT_SERVER_URL = "https://speaktome.services.mozilla.com";
 
     const DONE_ANIMATION = chrome.extension.getURL("Done.json");
     const SPINNING_ANIMATION = chrome.extension.getURL("Spinning.json");
@@ -589,6 +589,7 @@
                     sourceNode.disconnect(scriptprocessor);
                     sourceNode.disconnect(analyzerNode);
                     analyzerNode.disconnect(outputNode);
+                    scriptprocessor.disconnect(audioContext.destination);
                 };
                 // connect stream to our recorder
                 sourceNode.connect(scriptprocessor);
