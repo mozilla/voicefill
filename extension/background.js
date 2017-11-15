@@ -39,6 +39,6 @@ chrome.browserAction.onClicked.addListener(function() {
                         clearInterval(intervalConnection);
                     }
                 );
-            }, 500);
+            }, 1000);
   });
 });
