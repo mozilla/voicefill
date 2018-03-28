@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Voice Fill",
-  "version": "1.3.6",
+  "version": "1.3.7",
   "description": "Adds voice input to popular search pages in Firefox. Learn more about Voice Fill at https://testpilot.firefox.com",
   "developer": {
     "name": "Emerging Technologies Advanced Dev Team",
@@ -407,6 +407,8 @@
         "https://www.google.co.zm/*",
         "https://www.google.co.zw/",
         "https://www.google.co.zw/*",
+        "https://encrypted.google.com/*",
+        "https://encrypted.google.com/",
         "https://duckduckgo.com/",
         "https://duckduckgo.com/*",
         "https://start.duckduckgo.com/",
@@ -460,10 +462,8 @@
         "https://tw.search.yahoo.com/*",
         "https://www.bing.com/*",
         "https://www.bing.com/"
-        
-        
       ],
-      "js": ["purify.min.js", "bodymovin.js", "metrics.js", "content.js",
+      "js": ["bodymovin.js", "metrics.js", "content.js",
         "webrtc_vad.js"],
       "css": ["main.css"]
     }
