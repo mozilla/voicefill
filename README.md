@@ -1,8 +1,7 @@
-# Speak To Me
+# Voice Fill
 
 [![Travis](https://img.shields.io/travis/mozilla/voicefill.svg)](https://travis-ci.org/mozilla/voicefill)
-[![Available on Test Pilot](https://img.shields.io/badge/available_on-Test_Pilot-0996F8.svg)](https://testpilot.firefox.com/experiments/voice-fill)
-
+[![Mozilla Add-on](https://img.shields.io/amo/v/voice-fill.svg)](https://addons.mozilla.org/en-US/firefox/addon/voice-fill/)
 This is a simple WebExtension that adds support to use Speech To Text
 as an input method in web pages.
 
