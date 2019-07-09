@@ -273,7 +273,8 @@
     "assets/icon-redo.svg",
     "assets/icon-done.svg",
     "assets/ff-logo.png",
-    "assets/feedback.svg"
+    "assets/feedback.svg",
+    "vendor/webrtc_vad.wasm"
   ],
   "permissions": [
     "<all_urls>",
