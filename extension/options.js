@@ -3,12 +3,15 @@ function saveOptions(e) {
   browser.storage.sync.set({
     language: document.querySelector("#language").value,
     searchProvider: document.querySelector("#search-provider").value,
+    storeSample: document.querySelector("#store-sample").value,
   });
 }
 
 function restoreOptions() {
   const languageSelect = document.querySelector("#language");
   const providerSelect = document.querySelector("#search-provider");
+  const sampleSelect = document.querySelector("#store-sample");
+
   let languages;
 
   fetch(browser.extension.getURL("languages.json")).then((response) => {
@@ -77,8 +80,15 @@ function restoreOptions() {
     console.log(`Error: ${error}`);
   });
 
+  browser.storage.sync.get("storeSample").then((result) => {
+    sampleSelect.value = result.storeSample || "0";
+  }).catch((error) => {
+    console.log(`Error: ${error}`);
+  });
+
   languageSelect.addEventListener("change", saveOptions);
   providerSelect.addEventListener("change", saveOptions);
+  sampleSelect.addEventListener("change", saveOptions);
 }
 
 document.addEventListener("DOMContentLoaded", restoreOptions);
