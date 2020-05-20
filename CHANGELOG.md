@@ -1,5 +1,13 @@
 # Voice Fill Changelog
 
+## [1.4.5] - 2020-05-19
+### Added
+- Permission settings to allow Mozilla to store the audio samples
+### Changed
+### Removed
+### Fixed
+
+
 ## [1.4.4] - 2019-07-08
 ### Added
 ### Changed

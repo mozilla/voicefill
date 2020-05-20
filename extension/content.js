@@ -4,6 +4,7 @@
 
 let LANGUAGES = {};
 let LANGUAGE;
+let STORESAMPLE = "0";
 
 const languagePromise = fetch(
     browser.extension.getURL('languages.json')
@@ -24,6 +25,13 @@ const languagePromise = fetch(
         navigator.language :
         "en-US";
 });
+
+browser.storage.sync.get("storeSample").then((result) => {
+  STORESAMPLE = result.storeSample || "0";
+}).catch((error) => {
+  STORESAMPLE = "0";
+});
+
 
 (function speak_to_me() {
     console.log("Speak To Me starting up...");
@@ -332,7 +340,7 @@ const languagePromise = fetch(
             <div id="stm-footer">
                 Processing as {language}.
                 <br>
-                To change language, navigate to
+                To change language and permissions, navigate to
                 <a href="about:addons">about:addons</a>, then click the
                 Preferences button next to Voice Fill.
             </div>
@@ -714,6 +722,8 @@ const languagePromise = fetch(
                         headers: {
                             "Accept-Language-STT": LANGUAGE,
                             "Product-Tag": "vf",
+                            "Store-Sample": STORESAMPLE,
+                            "Store-Transcription": STORESAMPLE,
                         }
                     }).then(response => {
                         if (!response.ok) {
