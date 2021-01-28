@@ -15,7 +15,7 @@ deploy:
   on:
     repo: mozilla/voicefill
     tags: true
-    branch: 1.4.5
+    branch: 1.4.7
 notifications:
   slack:
     on_success: always

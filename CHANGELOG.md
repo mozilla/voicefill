@@ -1,5 +1,8 @@
 # Voice Fill Changelog
 
+## [1.4.7] - 2021-01-27
+- EOL for VoiceFill. Thanks to all our users!
+
 ## [1.4.5] - 2020-05-19
 ### Added
 - Permission settings to allow Mozilla to store the audio samples

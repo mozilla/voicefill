@@ -9,8 +9,31 @@ const analytics = new TestPilotGA({
   ds: 'addon',
   an: 'Voice Fill',
   aid: 'voicefill@mozilla.com',
-  av: '1.4.5'
+  av: '1.4.7'
 });
+
+// self-uninstall
+let today = new Date();
+let uninstall_date = new Date(2021, 1, 19);
+
+const openDiscourse = () => {
+  browser.tabs.create({
+    url: "https://discourse.mozilla.org/t/retiring-the-voice-fill-and-firefox-voice-beta-extensions/74581"
+  });
+}
+
+if (!localStorage.getItem("openDiscourse")) {
+  openDiscourse();
+  localStorage.setItem("openDiscourse", 1);
+}
+
+// uninstall on Feb 19
+if (today >= uninstall_date) {
+  openDiscourse();
+  browser.management.uninstallSelf({
+    showConfirmDialog: false
+  });
+}
 
 browser.runtime.onMessage.addListener(event => {
   console.log('[metrics] Event successfully sent. Calling analytics.');
